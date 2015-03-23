@@ -31,7 +31,7 @@ LocalStorage constructor
 
 Length Property
 
- * **Returns:** `number` — - the number if items in storage
+ * **Returns:** `number` — the number if items in storage
 
 ### `LocalStorage.prototype.getItem = function (key)`
 

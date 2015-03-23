@@ -19,7 +19,7 @@ function LocalStorage(filepath) {
     /**
      * Length Property
      *
-     * @returns {number} - the number if items in storage
+     * @returns {number} the number if items in storage
      */
     Object.defineProperty(this, "length", {
         get: function () {
