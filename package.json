@@ -1,6 +1,6 @@
 {
   "name": "json-localstorage",
-  "version": "1.2.2",
+  "version": "1.2.3",
   "description": "A clone of the Web Storage API for node using a JSON file for data",
   "main": "json-localstorage.js",
   "config": {
