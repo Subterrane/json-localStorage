@@ -71,8 +71,12 @@ LocalStorage.prototype.setItem = function (key, value) {
  */
 LocalStorage.prototype.removeItem = function (key) {
     var data, obj;
-    data = fs.readFileSync(this.filepath, this.options);
-    obj = JSON.parse(data);
+    try {
+        data = fs.readFileSync(this.filepath, this.options);
+        obj = JSON.parse(data);
+    } catch (e) {
+        obj = {};
+    }
     delete obj[key];
     fs.writeFileSync(this.filepath, JSON.stringify(obj), this.options);
 };
