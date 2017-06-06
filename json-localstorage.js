@@ -1,115 +1,83 @@
-var fs = require('fs');
-var path = require('path');
+"use strict";
+var fs = require("fs");
+var path = require("path");
 var config = require('./package.json').config;
-
-module.exports = LocalStorage;
-
-/**
- * LocalStorage constructor
- *
- * @param filepath - (optional) File path. Defaults to '.storage.json'.
- * @constructor
- */
-function LocalStorage(filepath) {
-    this.filepath = filepath || path.join(__dirname, config.filepath);
-    this.options = {"encoding": "utf8"};
-
-    var self = this;
-
-    /**
-     * Length Property
-     *
-     * @returns {number} the number if items in storage
-     */
-    Object.defineProperty(this, "length", {
-        get: function () {
-            var data, obj, size = 0;
-            data = fs.readFileSync(self.filepath, self.options);
-            obj = JSON.parse(data);
-            for (var key in obj) {
-                if (obj.hasOwnProperty(key)) size++;
-            }
-            return size;
+var LocalStorage;
+(function (LocalStorage) {
+    LocalStorage.length = getLength();
+    function getItem(key) {
+        return getStoredItems()[key] || null;
+    }
+    LocalStorage.getItem = getItem;
+    function setItem(key, value) {
+        var obj = getStoredItems();
+        obj[key] = value;
+        LocalStorage.length = countKeys(obj);
+        writeFile(obj);
+    }
+    LocalStorage.setItem = setItem;
+    function removeItem(key) {
+        var obj = getStoredItems();
+        delete obj[key];
+        LocalStorage.length = countKeys(obj);
+        writeFile(obj);
+    }
+    LocalStorage.removeItem = removeItem;
+    function clear() {
+        LocalStorage.length = 0;
+        writeFile({});
+        return undefined;
+    }
+    LocalStorage.clear = clear;
+    function getLength() {
+        return countKeys(getStoredItems());
+    }
+    LocalStorage.getLength = getLength;
+    function countKeys(obj) {
+        var size = 0;
+        for (var key in obj) {
+            if (obj.hasOwnProperty(key))
+                size++;
         }
-    })
-}
-
-/**
- * Get an item from storage
- *
- * @param key - the item to retrieve from storage
- * @returns {*}
- */
-LocalStorage.prototype.getItem = function (key) {
-    var data = fs.readFileSync(this.filepath, this.options);
-    var obj = JSON.parse(data);
-    return obj[key] || null;
-};
-
-/**
- * Set an item in storage
- *
- * @param key - the item name
- * @param value - the item value
- */
-LocalStorage.prototype.setItem = function (key, value) {
-    var data, obj;
-    try {
-        data = fs.readFileSync(this.filepath, this.options);
-        obj = JSON.parse(data);
-    } catch (e) {
-        obj = {};
+        return size;
     }
-    obj[key] = value;
-    fs.writeFileSync(this.filepath, JSON.stringify(obj), this.options);
-};
-
-/**
- * Remove an item from storage
- *
- * @param key - the item to remove from storage
- */
-LocalStorage.prototype.removeItem = function (key) {
-    var data, obj;
-    try {
-        data = fs.readFileSync(this.filepath, this.options);
-        obj = JSON.parse(data);
-    } catch (e) {
-        obj = {};
-    }
-    delete obj[key];
-    fs.writeFileSync(this.filepath, JSON.stringify(obj), this.options);
-};
-
-/**
- * Clear all items from storage
- */
-LocalStorage.prototype.clear = function () {
-    fs.writeFileSync(this.filepath, JSON.stringify({}), this.options);
-};
-
-/**
- * Return the name of the nth key in the list
- *
- * @param n - item number
- * @returns {*}
- */
-LocalStorage.prototype.key = function (n) {
-    var data, obj, counter = 0;
-
-    if (n > this.length) {
+    function key(n) {
+        var obj = getStoredItems();
+        var counter = 0;
+        for (var key in obj) {
+            if (obj.hasOwnProperty(key)) {
+                if (n == counter) {
+                    return key;
+                }
+                else if (counter > n) {
+                    return null;
+                }
+                counter++;
+            }
+        }
         return null;
     }
-
-    data = fs.readFileSync(this.filepath, this.options);
-    obj = JSON.parse(data);
-
-    for (var key in obj) {
-        if (obj.hasOwnProperty(key)) {
-            if (n == counter) {
-                return key;
-            }
-            counter++;
+    LocalStorage.key = key;
+    ;
+    function getStoredItems() {
+        try {
+            return JSON.parse(readFile());
+        }
+        catch (e) {
+            return {};
         }
     }
-};
+    function readFile() {
+        return fs.readFileSync(getFilepath(), getFileOptions());
+    }
+    function writeFile(obj) {
+        return fs.writeFileSync(getFilepath(), JSON.stringify(obj), getFileOptions());
+    }
+    function getFilepath() {
+        return path.join(__dirname, config.filepath);
+    }
+    function getFileOptions() {
+        return { "encoding": "utf8" };
+    }
+})(LocalStorage || (LocalStorage = {}));
+module.exports = LocalStorage;

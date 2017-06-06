@@ -1,5 +1,4 @@
-var LocalStorage = require('./json-localstorage.js');
-var localStorage = new LocalStorage();
+var localStorage = require('./json-localstorage.js');
 
 console.log(localStorage.removeItem("foo") === undefined);
 console.log(localStorage.setItem("testKey", "testValue") === undefined);
